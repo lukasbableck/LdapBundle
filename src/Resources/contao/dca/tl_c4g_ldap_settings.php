@@ -12,11 +12,16 @@
  *
  */
 
+use con4gis\LdapBundle\Classes\LdapConnection;
 use con4gis\LdapBundle\Entity\Con4gisLdapSettings;
+use Contao\Backend;
+use Contao\Database;
+use Contao\DataContainer;
+use Contao\DC_Table;
+use Contao\Input;
 use Contao\Message;
 use Contao\System;
 use Contao\UserGroupModel;
-use con4gis\LdapBundle\Classes\LdapConnection;
 
 /**
  * Table tl_c4g_ldap_settings
@@ -27,7 +32,7 @@ $GLOBALS['TL_DCA']['tl_c4g_ldap_settings'] = array
     // Config
     'config' => array
     (
-        'dataContainer'               => 'Table',
+        'dataContainer'               => DC_Table::class,
         'enableVersioning'            => false,
         'notDeletable'                => true,
         'notCopyable'                 => true,
@@ -297,27 +302,27 @@ $GLOBALS['TL_DCA']['tl_c4g_ldap_settings'] = array
 
     ),
 );
-class tl_c4g_ldap_settings extends \Backend
+class tl_c4g_ldap_settings extends Backend
 {
-    public function loadDataset(Contao\DataContainer $dc)
+    public function loadDataset(DataContainer $dc)
     {
         $objConfig = Database::getInstance()->prepare("SELECT id FROM tl_c4g_ldap_settings")->execute();
 
-        if (\Input::get('key')) return;
+        if (Input::get('key')) return;
 
-        if(!$objConfig->numRows && !\Input::get('act'))
+        if(!$objConfig->numRows && !Input::get('act'))
         {
             $this->redirect($this->addToUrl('act=create'));
         }
 
 
-        if(!\Input::get('id') && !\Input::get('act'))
+        if(!Input::get('id') && !Input::get('act'))
         {
             $GLOBALS['TL_DCA']['tl_c4g_settings']['config']['notCreatable'] = true;
             $this->redirect($this->addToUrl('act=edit&id='.$objConfig->id));
         }
 
-        \Contao\Message::addInfo($GLOBALS['TL_LANG']['tl_c4g_ldap_settings']['infotext']);
+        Message::addInfo($GLOBALS['TL_LANG']['tl_c4g_ldap_settings']['infotext']);
 
         $ldapConnection = new LdapConnection();
 
@@ -337,10 +342,6 @@ class tl_c4g_ldap_settings extends \Backend
         }
 
         if(!$ldap) {
-            Message::addError($GLOBALS['TL_LANG']['tl_c4g_ldap_settings']['bindError']);
-        }
-
-        if (!$ldapConnection->ldapBind($ldap) && !$bindDn && !$password && !$server && !$port) {
             Message::addError($GLOBALS['TL_LANG']['tl_c4g_ldap_settings']['bindError']);
         }
 

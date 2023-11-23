@@ -14,7 +14,6 @@
 
 use Contao\Backend;
 use Contao\Image;
-use Contao\Message;
 use Contao\StringUtil;
 
 /**
@@ -45,7 +44,7 @@ $GLOBALS['TL_DCA']['tl_user_group']['fields']['con4gisLdapUserGroup'] = array
         'sql'                     => "int(10) unsigned NOT NULL default '0'"
 );
 
-class tl_user_group_con4gis extends Contao\Backend
+class tl_user_group_con4gis extends Backend
 {
     /**
      * Return the delete user button
@@ -64,7 +63,7 @@ class tl_user_group_con4gis extends Contao\Backend
         if ($row['con4gisLdapUserGroup'] == "1") {
             return "";
         } else {
-            return '<a href="' . $this->addToUrl($href . '&amp;id=' . $row['id']) . '" title="' . Contao\StringUtil::specialchars($title) . '"' . $attributes . '>' . Contao\Image::getHtml($icon, $label) . '</a> ';
+            return '<a href="' . $this->addToUrl($href . '&amp;id=' . $row['id']) . '" title="' . StringUtil::specialchars($title) . '"' . $attributes . '>' . Image::getHtml($icon, $label) . '</a> ';
         }
     }
 }

@@ -12,10 +12,15 @@
  *
  */
 
+use con4gis\LdapBundle\Classes\LdapConnection;
 use con4gis\LdapBundle\Entity\Con4gisLdapSettings;
+use Contao\Backend;
+use Contao\Database;
+use Contao\DataContainer;
+use Contao\DC_Table;
+use Contao\Input;
 use Contao\Message;
 use Contao\MemberGroupModel;
-use con4gis\LdapBundle\Classes\LdapConnection;
 use Contao\System;
 
 /**
@@ -27,7 +32,7 @@ $GLOBALS['TL_DCA']['tl_c4g_ldap_fe_groups'] = array
     // Config
     'config' => array
     (
-        'dataContainer'               => 'Table',
+        'dataContainer'               => DC_Table::class,
         'enableVersioning'            => false,
         'notDeletable'                => true,
         'notCopyable'                 => true,
@@ -164,27 +169,27 @@ $GLOBALS['TL_DCA']['tl_c4g_ldap_fe_groups'] = array
 
     ),
 );
-class tl_c4g_ldap_fe_groups extends \Backend
+class tl_c4g_ldap_fe_groups extends Backend
 {
-    public function loadDataset(Contao\DataContainer $dc)
+    public function loadDataset(DataContainer $dc)
     {
         $objConfig = Database::getInstance()->prepare("SELECT id FROM tl_c4g_ldap_fe_groups")->execute();
 
-        if (\Input::get('key')) return;
+        if (Input::get('key')) return;
 
-        if(!$objConfig->numRows && !\Input::get('act'))
+        if(!$objConfig->numRows && !Input::get('act'))
         {
             $this->redirect($this->addToUrl('act=create'));
         }
 
 
-        if(!\Input::get('id') && !\Input::get('act'))
+        if(!Input::get('id') && !Input::get('act'))
         {
             $GLOBALS['TL_DCA']['tl_c4g_settings']['config']['notCreatable'] = true;
             $this->redirect($this->addToUrl('act=edit&id='.$objConfig->id));
         }
 
-        \Contao\Message::addInfo($GLOBALS['TL_LANG']['tl_c4g_ldap_fe_groups']['infotext']);
+        Message::addInfo($GLOBALS['TL_LANG']['tl_c4g_ldap_fe_groups']['infotext']);
 
         $ldapConnection = new LdapConnection();
 
@@ -222,14 +227,14 @@ class tl_c4g_ldap_fe_groups extends \Backend
 
         $currentTime = time();
 
-        foreach ($groups as $group) {
-
-            $contaoGroup = MemberGroupModel::findOneByName($group);
-            if (!$contaoGroup) {
-                $this->Database->prepare("INSERT INTO tl_member_group SET tstamp=?, name=?, con4gisLdapMemberGroup=1")->execute($currentTime, $group);
-            }
-
-        }
+		if(is_array($groups)){
+			foreach ($groups as $group) {
+				$contaoGroup = MemberGroupModel::findOneByName($group);
+				if (!$contaoGroup) {
+					$this->Database->prepare("INSERT INTO tl_member_group SET tstamp=?, name=?, con4gisLdapMemberGroup=1")->execute($currentTime, $group);
+				}
+			}
+		}
 
         $currentGroups = $this->Database->prepare("SELECT name FROM tl_member_group WHERE con4gisLdapMemberGroup=1;")->execute();
         $currentGroups = $currentGroups->fetchAllAssoc();
