@@ -121,8 +121,11 @@ class LoginListener extends System
                 if ($beUser->name == '' or $beUser->email == '') {
                     $ldapUser = $ldapConnection->filterLdap($bindDn, $bindPassword, $userFilter, $baseDn, $adServer);
                     $userMail = $ldapUser[0][$mailField][0];
-                    $userFirstname = $ldapUser[0][$firstnameField][0];
-                    $userLastname = $ldapUser[0][$lastnameField][0];
+					$userFirstname = $ldapUser[0][$firstnameField][0];
+					$userLastname = "";
+					if ($lastnameField != "") {
+						$userLastname = $ldapUser[0][$lastnameField][0];
+					}
 
                     if ($userMail) {
                         $beUser->email = $userMail;
@@ -130,6 +133,8 @@ class LoginListener extends System
 
                     if ($userFirstname && $userLastname) {
                         $beUser->name = $userFirstname . ' ' . $userLastname;
+                    }else if ($userFirstname) {
+                        $beUser->name = $userFirstname;
                     }
                 }
 
